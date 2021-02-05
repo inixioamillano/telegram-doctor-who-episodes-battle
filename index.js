@@ -16,7 +16,7 @@ const getOptions = (category) => {
         if (category === 'classic') {
             episodes = classicWho;
         } else if (category === 'all') {
-            episodes.concat(classicWho);
+            episodes = episodes.concat(classicWho);
         }
     }
     for (let i = 0; i < 4; i++) {
@@ -50,11 +50,12 @@ bot.setMyCommands([
 
 bot.onText(/\/botwho/, (msg, match) => {
     const chatId = msg.chat.id;
-    bot.sendMessage(chatId, 'Hi! I\'m a bot. I live into the TARDIS console.\n' + 
-        'I generate random episodes battles to keep the Doctor\'s companions entertained.\n\n' + 
+    bot.sendMessage(chatId, 'Hi! I\'m a bot. I live in the TARDIS console.\n' + 
+        'I generate random episode battles to keep the Doctor\'s companions entertained.\n\n' + 
         'Write /battle to generate a random battle between modern Doctor Who episodes\n\n' + 
         'Write /classicbattle to generate a random battle between Classic Doctor Who serials\n\n' +
-        'Write /timewar to generate a random battle between any episode aired since 1963');
+        'Write /timewar to generate a random battle between any episode aired since 1963\n\n' +
+        'v1.0.1 - Developed by @inixiodev');
 })
 
 bot.onText(/\/battle/, (msg, match) => {
