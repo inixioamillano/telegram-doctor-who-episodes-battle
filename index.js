@@ -78,6 +78,7 @@ bot.onText(/\/botwho/, (msg, match) => {
         'Write /battle to generate a random battle between modern Doctor Who episodes\n\n' + 
         'Write /classicbattle to generate a random battle between Classic Doctor Who serials\n\n' +
         'Write /timewar to generate a random battle between any episode aired since 1963\n\n' +
+        'Write /ranking to get the Top 5 episodes\n\n' +
         'v1.1.0 - Developed by @inixiodev');
 })
 
