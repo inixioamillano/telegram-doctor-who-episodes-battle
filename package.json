@@ -15,8 +15,12 @@
   "author": "Inixio Amillano Casteig",
   "license": "ISC",
   "dependencies": {
+    "bson": "^4.2.2",
     "dotenv": "^8.2.0",
     "fs": "0.0.1-security",
+    "mongo-sync": "^2.0.1",
+    "mongodb": "^3.6.4",
+    "mongoose": "^5.11.15",
     "node-telegram-bot-api": "^0.51.0"
   }
 }
