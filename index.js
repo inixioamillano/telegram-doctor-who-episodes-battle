@@ -103,6 +103,13 @@ bot.onText(/\/classicbattle/, (msg, match) => {
         is_anonymous: false,
         allows_multiple_answers: false
     })
+    .then((message) => {
+        new Poll({
+            chatId: msg.chat.id,
+            pollId: message.poll.id,
+            options
+        }).save();
+    })
 })
 
 function getTop5(votes){
@@ -148,6 +155,13 @@ bot.onText(/\/timewar/, (msg, match) => {
         is_anonymous: false,
         allows_multiple_answers: false
     })
+    .then((message) => {
+        new Poll({
+            chatId: msg.chat.id,
+            pollId: message.poll.id,
+            options
+        }).save();
+    })
 })
 
 bot.on('poll_answer', (p) => {
@@ -163,7 +177,10 @@ bot.on('poll_answer', (p) => {
             { upsert : true },
             (err, res) => {
                 if (!err) {
+                    console.log(res);
                     console.log("[TARDIS console] Vote saved!")
+                } else {
+                    console.log(err);
                 }
             });
         } else {
@@ -172,4 +189,4 @@ bot.on('poll_answer', (p) => {
     })
 })
 
-bot.on('polling_error', (e) => console.log(e))
+bot.on('polling_error', (e) => console.log('error', e))
