@@ -79,7 +79,7 @@ bot.onText(/\/botwho/, (msg, match) => {
         'Write /classicbattle to generate a random battle between Classic Doctor Who serials\n\n' +
         'Write /timewar to generate a random battle between any episode aired since 1963\n\n' +
         'Write /ranking to get the Top 5 episodes\n\n' +
-        'v1.1.0 - Developed by @inixiodev');
+        'v1.1.1 - Developed by @inixiodev');
 })
 
 bot.onText(/\/battle/, (msg, match) => {
@@ -113,40 +113,86 @@ bot.onText(/\/classicbattle/, (msg, match) => {
 })
 
 function getTop5(votes){
-    var result = [];
-    votes.reduce(function(res, vote) {
-        if (!res[vote.episode]) {
-            res[vote.episode] = { 
-                episode: vote.episode,
-                votes: vote.votes 
-            };
-            result.push(res[vote.episode])
+    return votes.slice(0, 10).map(v => {
+        return {
+            episode: v._id,
+            votes: v.votes
         }
-        res[vote.episode].votes += vote.votes;
-        return res;
-    }, {});
-    return result.sort((v1, v2) => v1.votes > v2.votes ? -1 : 1).slice(0, 5);
+    });
 }
 
 bot.onText(/\/ranking/, async (msg, match) => {
-    const votes = await Vote.find({});
-    const votesInGroup = votes.filter(v => v.chatId === msg.chat.id);
-    let totalVotes = 0;
-    let totalInGroup = 0;
-    let response = '**TOP 5 EPISODES**\n\nGlobal:\n\n';
-    const global = getTop5(votes);
+    const votesInGroup = await Vote.aggregate([
+        {
+            $match: {
+                chatId: msg.chat.id
+            }
+        },
+        {
+            $group: {
+                _id: "$episode", 
+                votes: { $sum: "$votes" }
+            }
+        },
+        {
+            $sort: {votes : -1}
+        }
+    ]);
+    const globalVotes = await Vote.aggregate([
+        {
+            $group: {
+                _id: "$episode", 
+                votes: { $sum: "$votes" }
+            }
+        },
+        {
+            $sort: {votes : -1}
+        }
+    ]);
+    const totalVotes = await Vote.aggregate([
+        {
+            $group: {
+                _id: '',
+                votes: { $sum: '$votes' }
+            }
+        }, {
+            $project: {
+                _id: 0,
+                votes: '$votes'
+            }
+        }
+    ]);
+    const totalInGroup = await Vote.aggregate([
+        {
+            $match: {
+                chatId: msg.chat.id
+            }
+        },
+        {
+            $group: {
+                _id: '',
+                votes: { $sum: '$votes' }
+            }
+        }, {
+            $project: {
+                _id: 0,
+                votes: '$votes'
+            }
+        }
+    ])
+    const medals = ['🥇', '🥈', '🥉'];
+    let response = '*TOP 10 EPISODES*\n\nGlobal:\n\n';
+    const global = getTop5(globalVotes);
     const inGroup = getTop5(votesInGroup);
-    global.forEach(v => {
-        response = response + `**${v.episode}** (${v.votes} votes)\n`;
-        totalVotes = totalVotes + v.votes;
+    global.forEach((v, i) => {
+        response = response + `${medals[i] ? medals[i] : ''} *${v.episode}* (${v.votes} votes)\n`;
     });
     response = response + '\n\nIn this group:\n\n';
-    inGroup.forEach(v => {
-        response = response + `**${v.episode}** (${v.votes} votes)\n`;
-        totalInGroup = totalInGroup + v.votes;
+    inGroup.forEach((v, i) => {
+        response = response + `${medals[i] ? medals[i] : ''} *${v.episode}* (${v.votes} votes)\n`;
     });
-    response = response + `\n\nTotal votes: ${totalVotes}\nTotal votes in group: ${totalInGroup}`;
-    bot.sendMessage(msg.chat.id, response,{parse_mode : "Markdown"});
+    response = response + `\n\nTotal votes: ${totalVotes[0].votes}\nTotal votes in group: ${totalInGroup[0].votes}`;
+    bot.sendMessage(msg.chat.id, response, {parse_mode : "Markdown"});
 })
 
 bot.onText(/\/timewar/, (msg, match) => {
